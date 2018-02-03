@@ -51,41 +51,41 @@ public class Inventory {
             currentCell.setItem(item);
             currentCell.setFilled();
             setCellsUnblocked(index);
-            if (isManaPot(item)){
+            if (isManaPot(item)) {
                 hasManaPot = true;
                 manaPotIndex = index;
-                currentCell.setItemsCount(currentCell.getItemsCount()+1);
+                currentCell.setItemsCount(currentCell.getItemsCount() + 1);
             }
-            if (isHasHealthPot(item)){
+            if (isHasHealthPot(item)) {
                 hasHealthPot = true;
                 healthPotIndex = index;
-                currentCell.setItemsCount(currentCell.getItemsCount()+1);
+                currentCell.setItemsCount(currentCell.getItemsCount() + 1);
             }
             return;
         }
-        if (isHasHealthPot(item)){
-            if (!hasHealthPot&&addable(index)){
+        if (isHasHealthPot(item)) {
+            if (!hasHealthPot && addable(index)) {
                 currentCell.setItem(item);
                 currentCell.setFilled();
                 hasHealthPot = true;
                 healthPotIndex = index;
                 setCellsUnblocked(index);
-                currentCell.setItemsCount(currentCell.getItemsCount()+1);
-            }else {
-                inventory.get(healthPotIndex).setItemsCount(inventory.get(healthPotIndex).getItemsCount()+1);
+                currentCell.setItemsCount(currentCell.getItemsCount() + 1);
+            } else {
+                inventory.get(healthPotIndex).setItemsCount(inventory.get(healthPotIndex).getItemsCount() + 1);
             }
             return;
         }
-        if (isManaPot(item)){
-            if (!hasManaPot&&addable(index)){
+        if (isManaPot(item)) {
+            if (!hasManaPot && addable(index)) {
                 currentCell.setItem(item);
                 currentCell.setFilled();
                 hasManaPot = true;
                 manaPotIndex = index;
                 setCellsUnblocked(index);
-                currentCell.setItemsCount(currentCell.getItemsCount()+1);
-            }else {
-                inventory.get(manaPotIndex).setItemsCount(inventory.get(manaPotIndex).getItemsCount()+1);
+                currentCell.setItemsCount(currentCell.getItemsCount() + 1);
+            } else {
+                inventory.get(manaPotIndex).setItemsCount(inventory.get(manaPotIndex).getItemsCount() + 1);
             }
             return;
         }
@@ -94,6 +94,8 @@ public class Inventory {
             currentCell.setItem(item);
             currentCell.setFilled();
             setCellsUnblocked(index);
+        } else {
+            addItem(findUnblockedCell(),item);
         }
     }
 
@@ -111,41 +113,53 @@ public class Inventory {
     public void deleteItem(int index) {
         Cell currentCell = inventory.get(index);
         if (!currentCell.isEmpty()) {
-            if (isManaPot(currentCell.getItem())){
-                currentCell.setItemsCount(currentCell.getItemsCount()-1);
-                if (currentCell.getItemsCount()>0){
+            if (isManaPot(currentCell.getItem())) {
+                currentCell.setItemsCount(currentCell.getItemsCount() - 1);
+                if (currentCell.getItemsCount() > 0) {
                     return;
                 }
             }
-            if (isHasHealthPot(currentCell.getItem())){
-                currentCell.setItemsCount(currentCell.getItemsCount()-1);
-                if (currentCell.getItemsCount()>0){
+            if (isHasHealthPot(currentCell.getItem())) {
+                currentCell.setItemsCount(currentCell.getItemsCount() - 1);
+                if (currentCell.getItemsCount() > 0) {
                     return;
                 }
             }
             currentCell.setEmpty();
         }
-        if (isBrake(index)){
-            transferItem(index+1,index);
+        if (isBrake(index)) {
+            transferItem(index + 1, index);
         }
     }
 
-    public void transferItem(int index,int destinitionCell){
+    public void transferItem(int index, int destinitionCell) {
         Cell current = inventory.get(index);
         Cell target = inventory.get(destinitionCell);
-        if (!current.isEmpty()&&target.isEmpty()){
+        if (!current.isEmpty() && target.isEmpty()) {
             target.setItem(current.getItem());
             current.setEmpty();
             setCellsUnblocked(destinitionCell);
         }
-        if (isBrake(index)){
-            transferItem(index+1,index);
+        if (isBrake(index)) {
+            transferItem(index + 1, index);
         }
     }
 
-    private boolean isBrake(int index){
-        if (index!=0&&index!=inventory.size()-1){
-            if (inventory.get(index).isEmpty()&&!inventory.get(index-1).isEmpty()&&!inventory.get(index+1).isEmpty()){
+    private int findUnblockedCell() {
+        long index =0 ;
+        for (Cell cell :
+                inventory) {
+            if (cell.isEmpty() && cell.isUnblocked()) {
+                index = cell.getId();
+            }
+
+        }
+        return (int)index;
+    }
+
+    private boolean isBrake(int index) {
+        if (index != 0 && index != inventory.size() - 1) {
+            if (inventory.get(index).isEmpty() && !inventory.get(index - 1).isEmpty() && !inventory.get(index + 1).isEmpty()) {
                 return true;
             }
         }
@@ -172,7 +186,7 @@ public class Inventory {
         return item.getClass().getSimpleName().equals(ManaPot.class.getSimpleName());
     }
 
-    private boolean isHasHealthPot(Item item){
+    private boolean isHasHealthPot(Item item) {
         return item.getClass().getSimpleName().equals(HealthPot.class.getSimpleName());
     }
 
