@@ -7,6 +7,7 @@ import com.derivedmed.testtasktwo.inventory.items.ManaPot;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class Inventory {
     @Getter
@@ -48,24 +49,24 @@ public class Inventory {
                 cell.setBlocked();
             }
             currentCell.setUnblocked();
-            currentCell.setItem(item);
+            currentCell.setItem(Optional.of(item));
             currentCell.setFilled();
             setCellsUnblocked(index);
-            if (isManaPot(item)) {
+            if (isManaPot(Optional.of(item))) {
                 hasManaPot = true;
                 manaPotIndex = index;
                 currentCell.setItemsCount(currentCell.getItemsCount() + 1);
             }
-            if (isHasHealthPot(item)) {
+            if (isHealthPot(Optional.of(item))) {
                 hasHealthPot = true;
                 healthPotIndex = index;
                 currentCell.setItemsCount(currentCell.getItemsCount() + 1);
             }
             return;
         }
-        if (isHasHealthPot(item)) {
+        if (isHealthPot(Optional.of(item))) {
             if (!hasHealthPot && addable(index)) {
-                currentCell.setItem(item);
+                currentCell.setItem(Optional.of(item));
                 currentCell.setFilled();
                 hasHealthPot = true;
                 healthPotIndex = index;
@@ -76,9 +77,9 @@ public class Inventory {
             }
             return;
         }
-        if (isManaPot(item)) {
+        if (isManaPot(Optional.of(item))) {
             if (!hasManaPot && addable(index)) {
-                currentCell.setItem(item);
+                currentCell.setItem(Optional.of(item));
                 currentCell.setFilled();
                 hasManaPot = true;
                 manaPotIndex = index;
@@ -91,7 +92,7 @@ public class Inventory {
         }
 
         if (addable(index)) {
-            currentCell.setItem(item);
+            currentCell.setItem(Optional.of(item));
             currentCell.setFilled();
             setCellsUnblocked(index);
         } else {
@@ -103,7 +104,7 @@ public class Inventory {
         Cell cellOne = inventory.get(index1);
         Cell cellTwo = inventory.get(index2);
         if (!(cellOne.isEmpty() && cellTwo.isEmpty())) {
-            Item item;
+            Optional<Item> item;
             item = cellOne.getItem();
             cellOne.setItem(cellTwo.getItem());
             cellTwo.setItem(item);
@@ -119,13 +120,14 @@ public class Inventory {
                     return;
                 }
             }
-            if (isHasHealthPot(currentCell.getItem())) {
+            if (isHealthPot(currentCell.getItem())) {
                 currentCell.setItemsCount(currentCell.getItemsCount() - 1);
                 if (currentCell.getItemsCount() > 0) {
                     return;
                 }
             }
             currentCell.setEmpty();
+            currentCell.setItem(Optional.empty());
         }
         if (isBrake(index)) {
             transferItem(index + 1, index);
@@ -138,6 +140,7 @@ public class Inventory {
         if (!current.isEmpty() && target.isEmpty()) {
             target.setItem(current.getItem());
             current.setEmpty();
+            current.setItem(Optional.empty());
             setCellsUnblocked(destinitionCell);
         }
         if (isBrake(index)) {
@@ -182,12 +185,12 @@ public class Inventory {
         }
     }
 
-    private boolean isManaPot(Item item) {
-        return item.getClass().getSimpleName().equals(ManaPot.class.getSimpleName());
+    private boolean isManaPot(Optional<Item> item) {
+        return item.get().getClass().getSimpleName().equals(ManaPot.class.getSimpleName());
     }
 
-    private boolean isHasHealthPot(Item item) {
-        return item.getClass().getSimpleName().equals(HealthPot.class.getSimpleName());
+    private boolean isHealthPot(Optional<Item> item) {
+        return item.get().getClass().getSimpleName().equals(HealthPot.class.getSimpleName());
     }
 
 }

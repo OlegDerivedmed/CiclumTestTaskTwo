@@ -4,12 +4,14 @@ import com.derivedmed.testtasktwo.inventory.items.Item;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Optional;
+
 @Getter
 public class Cell implements Copyable {
     @Setter
     private long id;
     @Setter
-    private Item item;
+    private Optional<Item> item;
     @Setter
     private int itemsCount;
     private boolean isEmpty;
