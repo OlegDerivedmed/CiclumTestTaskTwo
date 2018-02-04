@@ -12,7 +12,7 @@ import java.util.Optional;
 public class Inventory {
     @Getter
     private ArrayList<Cell> inventory;
-
+    private int filledCellsCount;
     private boolean hasManaPot;
     @Getter
     private int manaPotIndex;
@@ -41,107 +41,132 @@ public class Inventory {
         }
     }
 
-    public void addItem(int index, Item item) {
-        Cell currentCell = inventory.get(index);
-        if (inventory.stream().filter((c) -> c.isEmpty()).count() == inventory.size()) {
-            for (Cell cell :
-                    inventory) {
-                cell.setBlocked();
-            }
-            currentCell.setUnblocked();
-            currentCell.setItem(Optional.of(item));
-            currentCell.setFilled();
-            setCellsUnblocked(index);
-            if (isManaPot(Optional.of(item))) {
-                hasManaPot = true;
-                manaPotIndex = index;
-                currentCell.setItemsCount(currentCell.getItemsCount() + 1);
-            }
-            if (isHealthPot(Optional.of(item))) {
-                hasHealthPot = true;
-                healthPotIndex = index;
-                currentCell.setItemsCount(currentCell.getItemsCount() + 1);
-            }
-            return;
-        }
-        if (isHealthPot(Optional.of(item))) {
-            if (!hasHealthPot && addable(index)) {
-                currentCell.setItem(Optional.of(item));
+    public void addItem(int index, Optional<Item> item) {
+        if (filledCellsCount != inventory.size()) {
+            Cell currentCell = inventory.get(index);
+            if (inventory.stream().filter((c) -> c.isEmpty()).count() == inventory.size()) {
+                for (Cell cell :
+                        inventory) {
+                    cell.setBlocked();
+                }
+                currentCell.setUnblocked();
+                currentCell.setItem(item);
                 currentCell.setFilled();
-                hasHealthPot = true;
-                healthPotIndex = index;
                 setCellsUnblocked(index);
-                currentCell.setItemsCount(currentCell.getItemsCount() + 1);
-            } else {
-                inventory.get(healthPotIndex).setItemsCount(inventory.get(healthPotIndex).getItemsCount() + 1);
+                if (isManaPot(item)) {
+                    hasManaPot = true;
+                    manaPotIndex = index;
+                    currentCell.setItemsCount(currentCell.getItemsCount() + 1);
+                    filledCellsCount++;
+                    return;
+                }
+                if (isHealthPot(item)) {
+                    hasHealthPot = true;
+                    healthPotIndex = index;
+                    currentCell.setItemsCount(currentCell.getItemsCount() + 1);
+                    filledCellsCount++;
+                    return;
+                }
+                filledCellsCount++;
+                return;
             }
-            return;
-        }
-        if (isManaPot(Optional.of(item))) {
-            if (!hasManaPot && addable(index)) {
-                currentCell.setItem(Optional.of(item));
-                currentCell.setFilled();
-                hasManaPot = true;
-                manaPotIndex = index;
-                setCellsUnblocked(index);
-                currentCell.setItemsCount(currentCell.getItemsCount() + 1);
-            } else {
-                inventory.get(manaPotIndex).setItemsCount(inventory.get(manaPotIndex).getItemsCount() + 1);
+            if (isHealthPot(item)) {
+                if (!hasHealthPot && !addable(index)) {
+                    filledCellsCount++;
+                }
+                if (!hasHealthPot && addable(index)) {
+                    currentCell.setItem(item);
+                    currentCell.setFilled();
+                    hasHealthPot = true;
+                    healthPotIndex = index;
+                    setCellsUnblocked(index);
+                    currentCell.setItemsCount(currentCell.getItemsCount() + 1);
+                } else if (!hasHealthPot && !addable(index)) {
+                    addItem(findUnblockedCell(), item);
+                } else {
+                    inventory.get(healthPotIndex).setItemsCount(inventory.get(healthPotIndex).getItemsCount() + 1);
+                }
+                return;
             }
-            return;
-        }
+            if (isManaPot(item)) {
+                if (!hasManaPot && addable(index)) {
+                    filledCellsCount++;
+                }
+                if (!hasManaPot && addable(index)) {
+                    currentCell.setItem(item);
+                    currentCell.setFilled();
+                    hasManaPot = true;
+                    manaPotIndex = index;
+                    setCellsUnblocked(index);
+                    currentCell.setItemsCount(currentCell.getItemsCount() + 1);
+                } else if (!hasManaPot && !addable(index)) {
+                    addItem(findUnblockedCell(), item);
+                } else {
+                    inventory.get(manaPotIndex).setItemsCount(inventory.get(manaPotIndex).getItemsCount() + 1);
+                }
+                return;
+            }
 
-        if (addable(index)) {
-            currentCell.setItem(Optional.of(item));
-            currentCell.setFilled();
-            setCellsUnblocked(index);
-        } else {
-            addItem(findUnblockedCell(),item);
+            if (addable(index)) {
+                currentCell.setItem(item);
+                currentCell.setFilled();
+                setCellsUnblocked(index);
+                filledCellsCount++;
+            } else {
+                addItem(findUnblockedCell(), item);
+            }
         }
     }
 
     public void swapItems(int index1, int index2) {
-        Cell cellOne = inventory.get(index1);
-        Cell cellTwo = inventory.get(index2);
-        if (!(cellOne.isEmpty() && cellTwo.isEmpty())) {
-            Optional<Item> item;
-            item = cellOne.getItem();
-            cellOne.setItem(cellTwo.getItem());
-            cellTwo.setItem(item);
+        if (index1 <= inventory.size() - 1 && index2 <= inventory.size() - 1) {
+            Cell cellOne = inventory.get(index1);
+            Cell cellTwo = inventory.get(index2);
+            if (!(cellOne.isEmpty() && cellTwo.isEmpty())) {
+                Optional<Item> item;
+                item = cellOne.getItem();
+                cellOne.setItem(cellTwo.getItem());
+                cellTwo.setItem(item);
+            }
         }
     }
 
     public void deleteItem(int index) {
-        Cell currentCell = inventory.get(index);
-        if (!currentCell.isEmpty()) {
-            if (isManaPot(currentCell.getItem())) {
-                currentCell.setItemsCount(currentCell.getItemsCount() - 1);
-                if (currentCell.getItemsCount() > 0) {
-                    return;
+        if (filledCellsCount >= 0) {
+            Cell currentCell = inventory.get(index);
+            if (!currentCell.isEmpty()) {
+                if (isManaPot(currentCell.getItem())) {
+                    currentCell.setItemsCount(currentCell.getItemsCount() - 1);
+                    if (currentCell.getItemsCount() > 0) {
+                        filledCellsCount--;
+                        return;
+                    }
                 }
-            }
-            if (isHealthPot(currentCell.getItem())) {
-                currentCell.setItemsCount(currentCell.getItemsCount() - 1);
-                if (currentCell.getItemsCount() > 0) {
-                    return;
+                if (isHealthPot(currentCell.getItem())) {
+                    currentCell.setItemsCount(currentCell.getItemsCount() - 1);
+                    if (currentCell.getItemsCount() > 0) {
+                        filledCellsCount--;
+                        return;
+                    }
                 }
+                currentCell.setEmpty();
+                currentCell.setItem(Optional.empty());
+                filledCellsCount--;
             }
-            currentCell.setEmpty();
-            currentCell.setItem(Optional.empty());
-        }
-        if (isBrake(index)) {
-            transferItem(index + 1, index);
+            if (isBrake(index)) {
+                transferItem(index + 1, index);
+            }
         }
     }
 
     public void transferItem(int index, int destinitionCell) {
         Cell current = inventory.get(index);
         Cell target = inventory.get(destinitionCell);
-        if (!current.isEmpty() && target.isEmpty()) {
+        if ( !current.isEmpty()  && addable(destinitionCell)){
             target.setItem(current.getItem());
+            target.setFilled();
             current.setEmpty();
             current.setItem(Optional.empty());
-            setCellsUnblocked(destinitionCell);
         }
         if (isBrake(index)) {
             transferItem(index + 1, index);
@@ -149,7 +174,7 @@ public class Inventory {
     }
 
     private int findUnblockedCell() {
-        long index =0 ;
+        long index = 0;
         for (Cell cell :
                 inventory) {
             if (cell.isEmpty() && cell.isUnblocked()) {
@@ -157,7 +182,7 @@ public class Inventory {
             }
 
         }
-        return (int)index;
+        return (int) index;
     }
 
     private boolean isBrake(int index) {
