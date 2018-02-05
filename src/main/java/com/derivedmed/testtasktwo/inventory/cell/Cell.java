@@ -7,7 +7,7 @@ import lombok.Setter;
 import java.util.Optional;
 
 @Getter
-public class Cell implements Copyable {
+public class Cell {
     @Setter
     private long id;
     @Setter
@@ -16,10 +16,6 @@ public class Cell implements Copyable {
     private int itemsCount;
     private boolean isEmpty;
     private boolean isUnblocked;
-
-    public Cell copy() {
-        return new Cell();
-    }
 
     public void setEmpty() {
         isEmpty = true;

@@ -1,4 +1,4 @@
 package com.derivedmed.testtasktwo.inventory.items;
 
-public class HealthPot implements Item {
+public class HealthPot extends Item {
 }

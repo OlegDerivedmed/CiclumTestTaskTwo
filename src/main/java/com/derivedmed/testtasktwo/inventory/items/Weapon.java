@@ -1,4 +1,4 @@
 package com.derivedmed.testtasktwo.inventory.items;
 
-public class Weapon implements Item {
+public class Weapon extends Item {
 }

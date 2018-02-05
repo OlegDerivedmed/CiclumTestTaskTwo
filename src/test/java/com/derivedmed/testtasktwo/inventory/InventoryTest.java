@@ -1,6 +1,5 @@
 package com.derivedmed.testtasktwo.inventory;
 
-import com.derivedmed.testtasktwo.inventory.cell.Cell;
 import com.derivedmed.testtasktwo.inventory.items.Armor;
 import com.derivedmed.testtasktwo.inventory.items.HealthPot;
 import com.derivedmed.testtasktwo.inventory.items.ManaPot;
@@ -71,21 +70,12 @@ public class InventoryTest {
         inventory.addItem(7, Optional.of(new ManaPot()));
         inventory.addItem(7, Optional.of(new ManaPot()));
         inventory.addItem(6, Optional.of(new ManaPot()));
-        for (Cell cell : inventory.getInventory()) {
-            if (!cell.isEmpty()){
-                System.out.println(cell.getId());
-            }
-        }
         inventory.deleteItem(5);
         inventory.deleteItem(5);
         inventory.deleteItem(8);
-        System.out.println();
-        for (Cell cell : inventory.getInventory()) {
-            if (!cell.isEmpty()){
-                System.out.println(cell.getId());
-            }
-        }
+        inventory.deleteItem(3);
         long expectedEmpty = inventory.getInventory().stream().filter(cell -> cell.isEmpty()).count();
+        System.out.println(expectedEmpty);
         assertTrue(expectedEmpty == 8);
     }
 
@@ -95,21 +85,11 @@ public class InventoryTest {
         inventory.addItem(2,Optional.of(new HealthPot()));
         inventory.addItem(3, Optional.of(new ManaPot()));
         inventory.addItem(7,Optional.of(new Armor()));
-        for (Cell cell : inventory.getInventory()) {
-            if (!cell.isEmpty()){
-                System.out.println(cell.getId());
-            }
-        }
         inventory.transferItem(5,1);
         inventory.transferItem(1,5);
         inventory.transferItem(2,5);
         inventory.transferItem(4,1);
-        System.out.println();
-        for (Cell cell : inventory.getInventory()) {
-            if (!cell.isEmpty()){
-                System.out.println(cell.getId());
-            }
-        }
+        inventory.transferItem(11,12);
         long expectedEmpty = inventory.getInventory().stream().filter(cell -> cell.isEmpty()).count();
         assertTrue(expectedEmpty == 7);
     }
