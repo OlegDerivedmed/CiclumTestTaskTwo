@@ -70,17 +70,42 @@ public class Inventory {
             if (itemToBeDeleted instanceof ManaPot) {
                 deleteManaPot(currentCell, cellId, count);
             }
-            if (itemToBeDeleted instanceof HealthPot){
-                deleteHealthPot(currentCell,cellId,count);
+            if (itemToBeDeleted instanceof HealthPot) {
+                deleteHealthPot(currentCell, cellId, count);
             }
         }
-        if (empty()){
+        if (empty()) {
             setAllUnblocked();
         }
     }
 
+    public void transferItems(int currentCellId, int targetCellId) {
+        if (validCellId(currentCellId)&&validCellId(targetCellId)){
+            Cell currentCell = inventory.get(currentCellId);
+            Cell targetCell = inventory.get(targetCellId);
+            if (deletable((int) currentCell.getId())&&deletable((int) targetCell.getId())){
+                Item item;
+                int count;
+                item = targetCell.getItem();
+                count = targetCell.getItemsCount();
+                targetCell.setItem(currentCell.getItem());
+                targetCell.setItemsCount(currentCell.getItemsCount());
+                currentCell.setItem(item);
+                currentCell.setItemsCount(count);
+                return;
+            }
+            if (deletable((int) currentCell.getId())){
+                Item item = currentCell.getItem();
+                int count = currentCell.getItemsCount();
+                int id = (int) currentCell.getId();
+                deleteItem(id,count);
+                addItem(findemptyCell(),item,count);
+            }
+        }
+    }
+
     private void setAllUnblocked() {
-        for (Cell cell : inventory){
+        for (Cell cell : inventory) {
             cell.setUnblocked();
         }
     }
@@ -95,10 +120,11 @@ public class Inventory {
         manaPotCellsCount = 0;
         emptyCellsCount++;
         currentCell.setItemsCount(0);
-        if (isBrake(cellId)){
+        if (isBrake(cellId)) {
             fixBrake();
         }
     }
+
     private void deleteHealthPot(Cell currentCell, int cellId, int count) {
         if (count < inventory.get(cellId).getItemsCount()) {
             inventory.get(cellId).setItemsCount(inventory.get(cellId).getItemsCount() - count);
@@ -109,7 +135,7 @@ public class Inventory {
         healthPotCellsCount = 0;
         emptyCellsCount++;
         currentCell.setItemsCount(0);
-        if (isBrake(cellId)){
+        if (isBrake(cellId)) {
             fixBrake();
         }
     }

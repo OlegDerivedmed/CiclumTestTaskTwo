@@ -24,6 +24,11 @@ public class Test {
         for (Cell cell : inventory.getInventory()) {
             System.out.println(cell.toString());
         }
+        inventory.transferItems(5,10);
+        System.out.println(inventory.getEmptyCellsCount());
+        for (Cell cell : inventory.getInventory()) {
+            System.out.println(cell.toString());
+        }
         System.out.println();
         inventory.deleteItem(4, 1);
         System.out.println(inventory.getEmptyCellsCount());
